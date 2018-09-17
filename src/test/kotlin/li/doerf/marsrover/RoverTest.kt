@@ -2,15 +2,17 @@ package li.doerf.marsrover
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import java.lang.IllegalStateException
 
 class RoverTest {
 
     @ParameterizedTest
     @CsvSource( "0, 0, 'n'", "0, 1, 'w'", "1, 0, 'e'", "1, 1, 's'" )
     fun roverInit(x: Int, y: Int, d: String) {
-        val rover = Rover(x, y, d)
+        val rover = Rover(x, y, d, arrayOf())
         assertEquals(x, rover.x)
         assertEquals(y, rover.y)
         assertEquals(d, rover.d)
@@ -44,11 +46,38 @@ class RoverTest {
             "9, 0, e, f, 0, 0, e"
     )
     fun move(inX: Int, inY: Int, inD: String, input: String, exX: Int, exY: Int, exD: String) {
-        val rover = Rover(inX, inY, inD)
+        val rover = Rover(inX, inY, inD, arrayOf())
         rover.move(input)
         assertEquals(exX, rover.x)
         assertEquals(exY, rover.y)
         assertEquals(exD, rover.d)
+    }
+
+    @Test
+    fun withObstacle() {
+        val rover = Rover(0, 0, "n", arrayOf(Obstacle(0,2)))
+        assertThrows<IllegalStateException> { rover.move("ff") }
+        assertEquals(0, rover.x)
+        assertEquals(1, rover.y)
+        assertEquals("n", rover.d)
+    }
+
+    @Test
+    fun withObstacle2() {
+        val rover = Rover(0, 0, "n", arrayOf(Obstacle(1,2)))
+        assertThrows<IllegalStateException> { rover.move("ffrf") }
+        assertEquals(0, rover.x)
+        assertEquals(2, rover.y)
+        assertEquals("e", rover.d)
+    }
+
+    @Test
+    fun withObstacle3() {
+        val rover = Rover(0, 0, "n", arrayOf(Obstacle(9,1)))
+        assertThrows<IllegalStateException> { rover.move("flf") }
+        assertEquals(0, rover.x)
+        assertEquals(1, rover.y)
+        assertEquals("w", rover.d)
     }
 
 }

@@ -1,6 +1,8 @@
 package li.doerf.marsrover
 
-class Rover(var x: Int, var y: Int, var d: String) {
+import java.lang.IllegalStateException
+
+class Rover(var x: Int, var y: Int, var d: String, val obstacles: Array<Obstacle>) {
 
     private val directions: Array<String> = arrayOf("w", "n", "e", "s")
 
@@ -20,36 +22,47 @@ class Rover(var x: Int, var y: Int, var d: String) {
     }
 
     private fun move(direction: Char) {
-        val s = if (direction == 'f')  1 else -1
-        when(d) {
-            "s" -> y -= s
-            "e" -> x += s
-            "w" -> x -= s
-            else -> y += s
+        val newP = calculateNewPosition(direction)
+        if(checkForObstacle(newP.first, newP.second)) {
+            throw IllegalStateException("obstacle detected")
         }
-        wrapPosition()
-
+        x = newP.first
+        y = newP.second
     }
 
-    private fun wrapPosition() {
-        wrapX()
-        wrapY()
+    private fun checkForObstacle(x: Int, y: Int): Boolean {
+        for(o in obstacles) {
+            if (o.x == x && o.y == y) {
+                return true
+            }
+        }
+        return false
     }
 
-    private fun wrapX() {
-        if (x < 0) {
-            x = 9
-        } else if (x > 9) {
-            x = 0
+    fun calculateNewPosition(direction: Char): Pair<Int,Int> {
+        val s = if (direction == 'f') 1 else -1
+        var xNew = x
+        var yNew = y
+        when (d) {
+            "s" -> yNew -= s
+            "e" -> xNew += s
+            "w" -> xNew -= s
+            else -> yNew += s
         }
+        return wrapPosition(Pair(xNew, yNew))
     }
 
-    private fun wrapY() {
-        if (y < 0) {
-            y = 9
-        } else if (y > 9) {
-            y = 0
+    private fun wrapPosition(p: Pair<Int,Int>): Pair<Int, Int> {
+        return Pair(wrap(p.first), wrap(p.second))
+    }
+
+    private fun wrap(i: Int): Int {
+        if (i < 0) {
+            return 9
+        } else if (i > 9) {
+            return 0
         }
+        return i
     }
 
     private fun turn(direction: Char) {

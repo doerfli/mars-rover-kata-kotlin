@@ -28,3 +28,10 @@ compileKotlin {
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
+
+test {
+    useJUnitPlatform()
+    reports {
+        junitXml.enabled = true
+    }
+}

@@ -2,7 +2,7 @@ package li.doerf.marsrover
 
 import java.lang.IllegalStateException
 
-class Rover(var x: Int, var y: Int, var d: String, val obstacles: Array<Obstacle>) {
+class Rover(var position: Position, var d: String, val obstacles: Array<Obstacle>) {
 
     private val directions: Array<String> = arrayOf("w", "n", "e", "s")
 
@@ -23,37 +23,35 @@ class Rover(var x: Int, var y: Int, var d: String, val obstacles: Array<Obstacle
 
     private fun move(direction: Char) {
         val newP = calculateNewPosition(direction)
-        if(checkForObstacle(newP.first, newP.second)) {
+        if(checkForObstacle(newP)) {
             throw IllegalStateException("obstacle detected")
         }
-        x = newP.first
-        y = newP.second
+        position = newP
     }
 
-    private fun checkForObstacle(x: Int, y: Int): Boolean {
+    private fun checkForObstacle(position: Position): Boolean {
         for(o in obstacles) {
-            if (o.x == x && o.y == y) {
+            if (o.position.x == position.x && o.position.y == position.y) {
                 return true
             }
         }
         return false
     }
 
-    fun calculateNewPosition(direction: Char): Pair<Int,Int> {
+    private fun calculateNewPosition(direction: Char): Position {
         val s = if (direction == 'f') 1 else -1
-        var xNew = x
-        var yNew = y
+        val newPos = Position(position.x, position.y)
         when (d) {
-            "s" -> yNew -= s
-            "e" -> xNew += s
-            "w" -> xNew -= s
-            else -> yNew += s
+            "e" -> newPos.x += s
+            "w" -> newPos.x -= s
+            "s" -> newPos.y -= s
+            else -> newPos.y += s
         }
-        return wrapPosition(Pair(xNew, yNew))
+        return wrapPosition(newPos)
     }
 
-    private fun wrapPosition(p: Pair<Int,Int>): Pair<Int, Int> {
-        return Pair(wrap(p.first), wrap(p.second))
+    private fun wrapPosition(p: Position): Position {
+        return Position(wrap(p.x), wrap(p.y))
     }
 
     private fun wrap(i: Int): Int {
